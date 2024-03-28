@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import backgroundImage from '../../assets/images/backgroundimage.jpg'; // Path to your background image
+import backgroundImage from '../../assets/images/backgroundimage.jpg';
 import '../../assets/styles/Signup.css';
 import { signUpUser } from '../../services/users.api';
 import { validateSignupForm } from '../../helpers/validations/user.validation';
@@ -28,7 +28,6 @@ const Signup: React.FC = () => {
         const validationErrors = validateSignupForm(firstName, lastName, username, email, password, confirmPassword);
         if (validationErrors) {
             setErrors(validationErrors);
-            // Clear validation errors after 3 seconds
             setTimeout(() => {
                 setErrors({
                     firstName: '',
@@ -43,23 +42,19 @@ const Signup: React.FC = () => {
         }
 
         try {
-            // Call the signup API
             const userData = { firstName, lastName, username, email, password };
             const response = await signUpUser(userData);
             if (response.data.code === 409) {
                 setErrorMessage(response.data.status);
                 setTimeout(() => {
-                    // Redirect to login page after 2 seconds
                     window.location.href = '/login';
                 }, 2000);
             }
             if (response.data.code === 200) {
                 setErrorMessage(response.data.status);
                 setTimeout(() => {
-                    // Redirect to login page after 2 seconds
                     window.location.href = '/login';
                 }, 2000);
-                
             }
 
         } catch (error) {
@@ -69,18 +64,19 @@ const Signup: React.FC = () => {
 
     return (
         <div
-            className="container-fluid"
+            className="container-fluid position-relative"
             style={{
                 backgroundImage: `url(${backgroundImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 height: '100vh',
-                width: '140vh', // Adjust height as needed
+                width: '140vh',
             }}
         >
-            <div className="row justify-content-center align-items-center" style={{ height: '100%' }}>
-                <div className="col-md-7 " >
-                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <div className="position-absolute top-0 start-0 bottom-0 end-0" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}></div>
+            <div className="row justify-content-center align-items-center" style={{ position: 'absolute', top: '0', left: '0', right: '0', bottom: '0' }}>
+                <div className="col-md-7">
+                    <div className="card" style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
                         <div className="card-body">
                             <form onSubmit={handleSignup}>
                                 <div className="mb-3 row">

@@ -5,6 +5,9 @@ import reportWebVitals from './reportWebVitals';
 
 import AppRouter from './routes';
 
+import Sidebar from './components/NavBars/side.navbar';
+import TaskManager from './components/TaskList/taskManager';
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
