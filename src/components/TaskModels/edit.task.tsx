@@ -2,89 +2,86 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Task } from '../taskTables/task.list';
 import '../../assets/styles/addTask.model.css';
 import background from "../../assets/images/addTask.jpg";
-import { addTask } from '../../services/task.api';
-import { validateTaskForm, Errors } from '../../helpers/validations/task.validation';
+import { Errors, validateTaskForm } from '../../helpers/validations/task.validation';
+import { capitalizeFirstLetter, formatDate } from '../../helpers/common.helpers';
+import { editTask } from '../../services/task.api';
 
-interface AddTaskModalProps {
+interface EditTaskModalProps {
     showModal: boolean;
     onClose: () => void;
-    onSubmit: (newTask: Task) => void;
+    onSubmit: (editedTask: Task) => void;
+    selectedTask: Task | null;
 }
 
-const AddTaskModal: React.FC<AddTaskModalProps> = ({ showModal, onClose, onSubmit }) => {
-    const userIdString = localStorage.getItem("user");
-    const userId = userIdString ? parseInt(userIdString) : 0; 
-
-    const [newTask, setNewTask] = useState<Task>({
-        id: userId,
-        title: '',
-        description: '',
-        priority: 'Low',
-        dueDate: '',
-        category: '',
-        user: userId, // Set user ID initially
-        taskId: 0,
-    
-        
-    });
-
+const EditTaskModal: React.FC<EditTaskModalProps> = ({ showModal, onClose, onSubmit, selectedTask }) => {
+    const [editedTask, setEditedTask] = useState<Task | null>(null);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [errors, setErrors] = useState<Errors | null>(null);
     const [successMessage, setSuccessMessage] = useState<string>('');
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
+    useEffect(() => {
+        setEditedTask(selectedTask);
+    }, [selectedTask]);
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+        if (!editedTask) return;
         const { name, value } = e.target;
-        setNewTask(prevTask => ({
-            ...prevTask,
+        if (name === 'dueDate') {
+            const formattedDate = formatDate(value); // Format the date
+            setEditedTask(prevTask => ({
+                ...(prevTask as Task), // Type assertion here
+                [name]: formattedDate
+            }));
+        } else {
+            setEditedTask(prevTask => ({
+                ...(prevTask as Task), // Type assertion here
+                [name]: value
+            }));
+        }
+    };
+    
+    
+    const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
+        if (!editedTask) return;
+        const { name, value } = e.target;
+        setEditedTask(prevTask => ({
+            ...(prevTask as Task), // Type assertion here
             [name]: value
         }));
     };
+    
 
     const handleSubmit = async (): Promise<void> => {
-        const validation = validateTaskForm(newTask.title, newTask.description, newTask.category, newTask.dueDate, newTask.priority)
+        if(editedTask){
+        const validation =  validateTaskForm(editedTask.title,editedTask.description,editedTask.category,editedTask.dueDate,editedTask.priority)
         if (validation) {
             setErrors(validation);
-            return;
-        }
-
-        try {
-            const response = await addTask(newTask);
-            if (response.data.code === 200) {
+            return; 
+        }}
+        try{
+            const response = await editTask(editedTask)
+            if(response.data.code ===200){
                 setSuccessMessage(response.data.status);
-                onSubmit(newTask);
-                // Clear the form after successful submission
-                setNewTask({
-                    ...newTask,
-                    title: '',
-                    description: '',
-                    priority: 'Low',
-                    dueDate: '',
-                    category: '',
-                });
-                setErrors(null);
                 setTimeout(() => {
                     setSuccessMessage('');
                     onClose();
                 }, 2000);
-            } else {
+            }else {
                 setErrorMessage(response.data.status);
             }
-        } catch (error) {
-            console.error('Failed to add task:', error);
+        }catch(error){
             setErrorMessage('Failed to add task. Please try again.');
         }
     };
 
-    useEffect(() => {
-        let timeout: NodeJS.Timeout;
-        if (errorMessage) {
-            timeout = setTimeout(() => {
-                setErrorMessage('');
-            }, 2000);
-        }
-
-        return () => clearTimeout(timeout);
-    }, [errorMessage]);
+    let formattedDueDate = '';
+    if (editedTask && editedTask.dueDate) {
+        formattedDueDate = formatDate(editedTask.dueDate);
+    }
+    let formattedPriority=''
+    if(editedTask && editedTask.priority){
+        formattedPriority=capitalizeFirstLetter(editedTask.priority)
+    }
 
     return (
         showModal ? (
@@ -93,7 +90,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ showModal, onClose, onSubmi
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title-container">
-                                <h4 className="modal-title">Add Task</h4>
+                                <h4 className="modal-title">Edit Task</h4>
                             </div>
                             <div className="close-button-container">
                                 <button type="button" className="close-button" aria-label="Close" onClick={onClose}>
@@ -106,17 +103,18 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ showModal, onClose, onSubmi
                             <form>
                                 <div className="form-group">
                                     <label htmlFor="title">Title</label>
-                                    <input type="text" id="title" className="form-control" name="title" value={newTask.title} onChange={handleChange} placeholder="Enter title" />
+                                    <input type="text" id="title" className="form-control" name="title" value={editedTask?.title || ''} onChange={handleChange} placeholder="Enter title" />
                                     {errors && errors.title && <span className="error">{errors.title}</span>}
                                 </div>
+    
                                 <div className="form-group">
                                     <label htmlFor="description">Description</label>
-                                    <textarea id="description" className="form-control" name="description" value={newTask.description} onChange={handleChange} placeholder="Enter description" />
+                                    <textarea id="description" className="form-control" name="description" value={editedTask?.description || ''} onChange={handleDescriptionChange} placeholder="Enter description" />
                                     {errors && errors.description && <span className="error">{errors.description}</span>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="priority">Priority</label>
-                                    <select id="priority" className="form-control" name="priority" value={newTask.priority} onChange={handleChange}>
+                                    <select id="priority" className="form-control" name="priority" value={formattedPriority || ''} onChange={handleChange}>
                                         <option value="Low">Low</option>
                                         <option value="Medium">Medium</option>
                                         <option value="High">High</option>
@@ -125,14 +123,13 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ showModal, onClose, onSubmi
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="dueDate">Due Date</label>
-                                    <input type="date" id="dueDate" className="form-control" name="dueDate" value={newTask.dueDate} onChange={handleChange} />
+                                    <input type="text" id="dueDate" className="form-control" name="dueDate" value={formattedDueDate} onChange={handleChange} placeholder="mm/dd/yyyy" />
                                     {errors && errors.date && <span className="error">{errors.date}</span>}
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="category">Category</label>
-                                    <select id="category" className="form-control" name="category" value={newTask.category} onChange={handleChange}>
+                                    <select id="category" className="form-control" name="category" value={editedTask?.category || ''} onChange={handleChange}>
                                         <option value="study">Study</option>
-                                        <option value="work">Work</option>
                                         <option value="event">Event</option>
                                         <option value="daily life">Daily Life</option>
                                         <option value="sports">Sports</option>
@@ -147,7 +144,7 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ showModal, onClose, onSubmi
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
-                            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Add Task</button>
+                            <button type="button" className="btn btn-primary" onClick={handleSubmit}>Save Changes</button>
                         </div>
                     </div>
                 </div>
@@ -156,4 +153,4 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ showModal, onClose, onSubmi
     );
 };
 
-export default AddTaskModal;
+export default EditTaskModal;

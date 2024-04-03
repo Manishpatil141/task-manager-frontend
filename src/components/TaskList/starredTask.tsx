@@ -1,4 +1,3 @@
-// Inside TaskManager.tsx
 
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -10,11 +9,12 @@ import TaskDetailsModal from '../TaskModels/task.list.model';
 import AddTaskModal from '../TaskModels/add.task.model'; // Import the EditTaskModal
 import addButtonImage from '../../assets/images/add.png';
 import LoadingSpinner from '../loadingIcons/loading';
-import { completeTask, deleteTask, getTasks, starredTask } from '../../services/task.api';
+import { deleteTask, getTasks, starredTask } from '../../services/task.api';
 import EditTaskModal from '../TaskModels/edit.task';
 import Toaster from '../TaskModels/toaster';
+import StarredTaskList from '../taskTables/starredTask.list';
 
-const TaskManager: React.FC = () => {
+const StarredTasks: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
@@ -90,7 +90,8 @@ const TaskManager: React.FC = () => {
                 if (userIdString !== null) {
                     const userId = parseInt(userIdString);  // Convert user ID to a number
                     if (!isNaN(userId)) {
-                        const response = await getTasks({ userId });
+                        const starred = true
+                        const response = await getTasks({userId,starred});
                         setTasks(response.data.data);
                     } else {
                         console.error('User ID is not a valid number');
@@ -102,10 +103,10 @@ const TaskManager: React.FC = () => {
                 console.error('Failed to fetch tasks:', error);
             }
         };
-
+    
         fetchTasks();
     }, []);
-
+    
 
     const handleAddTaskSubmit = async (newTask: Task): Promise<void> => {
         try {
@@ -114,7 +115,7 @@ const TaskManager: React.FC = () => {
             setTimeout(() => {
                 setShowAddModal(false);
             }, 1500);
-
+    
             // Retrieve userId from localStorage
             const userIdString = localStorage.getItem("user");
             const userId = userIdString ? parseInt(userIdString) : 0; // Default to 0 if user ID is not found or not a valid number
@@ -125,58 +126,40 @@ const TaskManager: React.FC = () => {
             console.error('Failed to add task:', error);
         }
     };
+    
 
-
-    async function handleStarr(task: any): Promise<void> {
-        if (task.starred === false) {
+  async  function handleStarr(task: any): Promise<void> {
+        if(task.starred===false){
             const star = 1;
             const user = task.user;
-            const taskId = task.taskId
-            const response = await starredTask({ user, taskId, star })
-            if (response.data.code === 200) {
+            const taskId=task.taskId
+            const response = await starredTask({user,taskId,star})
+            if(response.data.code ===200){
                 // Retrieve userId from localStorage
-                const userIdString = localStorage.getItem("user");
-                const userId = userIdString ? parseInt(userIdString) : 0; // Default to 0 if user ID is not found or not a valid number
-                // Fetch tasks using userId
-                const response = await getTasks({ userId });
-                setTasks(response.data.data);
-            } else {
+            const userIdString = localStorage.getItem("user");
+            const userId = userIdString ? parseInt(userIdString) : 0; // Default to 0 if user ID is not found or not a valid number
+            // Fetch tasks using userId
+            const response = await getTasks({ userId });
+            setTasks(response.data.data);
+            }else{
                 return
             }
-        } else {
+        }else{
             const star = 0;
             const user = task.user;
-            const taskId = task.taskId
-            const response = await starredTask({ user, taskId, star })
-            if (response.data.code === 200) {
+            const taskId=task.taskId
+            const response= await starredTask({user,taskId,star})
+            if(response.data.code ===200){
                 // Retrieve userId from localStorage
-                const userIdString = localStorage.getItem("user");
-                const userId = userIdString ? parseInt(userIdString) : 0; // Default to 0 if user ID is not found or not a valid number
-                // Fetch tasks using userId
-                const response = await getTasks({ userId });
-                setTasks(response.data.data);
-
-            }
-
+            const userIdString = localStorage.getItem("user");
+            const userId = userIdString ? parseInt(userIdString) : 0; // Default to 0 if user ID is not found or not a valid number
+            // Fetch tasks using userId
+            const response = await getTasks({ userId });
+            setTasks(response.data.data);
+            
         }
-    }
-    async function handleCompleted(task: any): Promise<void> {
-        if (task.status === false) {
-            const user = task.user;
-            const taskId = task.taskId
-            const response = await completeTask ({ user, taskId })
-            if (response.data.code === 200) {
-                const userIdString = localStorage.getItem("user");
-                const userId = userIdString ? parseInt(userIdString) : 0; // Default to 0 if user ID is not found or not a valid number
-                const response = await getTasks({ userId });
-                setTasks(response.data.data);
-            } else {
-                return
-            }
-        }
-
-    }
-
+        
+    }}
 
     return (
         <div className="container-fluid" style={{ position: 'relative', height: '100vh', width: '100%' }}>
@@ -185,14 +168,12 @@ const TaskManager: React.FC = () => {
                 <div className="flex-grow-1">
                     <TopNavbar onSearch={() => { }} />
                     <div className="task-manager">
-                        <TaskList
+                        <StarredTaskList
                             tasks={tasks}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onSetPriority={handleSetPriority}
                             onView={handleView}
-                            onStarred={handleStarr}
-                            onCompleted={handleCompleted}
                         />
                     </div>
                 </div>
@@ -213,4 +194,4 @@ const TaskManager: React.FC = () => {
     );
 };
 
-export default TaskManager;
+export default StarredTasks;

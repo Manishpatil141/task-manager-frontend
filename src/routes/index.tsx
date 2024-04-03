@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ForgotPassword, Login, Signup, ChangePassword } from './auth';
-import { TaskManager } from './task.routes';
+import { ForgotPassword, Login, Signup, ChangePassword,Logout } from './auth';
+import { CompletedTasks, StarredTasks, TaskManager } from './task.routes';
 
 
 const AppRouter: React.FC = () => {
@@ -15,6 +15,9 @@ const AppRouter: React.FC = () => {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ChangePassword />} />
                 <Route path="/tasks" element={<TaskManager />} />
+                <Route path="/starred-tasks" element={<StarredTasks />} />
+                <Route path="/completed-tasks" element={<CompletedTasks />} />
+                <Route path="/logout" element={<Logout />} />
 
                 {/* Add more routes for other pages if needed */}
                 {/* <Route path="/other-page" element={<OtherPageComponent />} /> */}

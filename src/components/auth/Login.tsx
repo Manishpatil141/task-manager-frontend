@@ -145,6 +145,7 @@ const Login: React.FC = () => {
             if (response.data.code === 200) {
                 localStorage.setItem('accessToken', response.data.data.accessToken);
                 localStorage.setItem('refreshToken', response.data.data.longLivedAccessToken);
+                localStorage.setItem('user', response.data.data.user.userId);
                 // setErrorMessage(response.data.status);
                 window.location.href = '/tasks';
             }

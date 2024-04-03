@@ -23,4 +23,8 @@
   .logout-link {
     background-color: rgba(173, 216, 230, 0.5);
   }
-  
+  /* sideNavBar.css */
+.nav-link.active {
+  background-color: #063466 !important;/* Set the background color to purple for the active class */
+  color: white; /* Set the text color to white for better visibility */
+}

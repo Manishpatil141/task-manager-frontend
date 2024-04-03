@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import '../../assets/styles/view.model.css';
 import background from "../../assets/images/view.jpg";
+import { formatDate } from '../../helpers/common.helpers';
 
 interface Task {
     id: number;
@@ -45,7 +46,7 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({ showModal, selected
                             <div className="text-content">
                                 <p><strong>Description:</strong> {selectedTask?.description}</p>
                                 <p><strong>Priority:</strong> <span style={{ color: getPriorityColor(selectedTask?.priority), fontWeight: 'bold' }}>{selectedTask?.priority}</span></p>
-                                <p><strong>Due Date:</strong> {selectedTask?.dueDate}</p>
+                                <p><strong>Due Date:</strong> {selectedTask && selectedTask.dueDate ? formatDate(selectedTask.dueDate) : 'N/A'}</p>
                                 <p><strong>Category:</strong> {selectedTask?.category}</p>
                             </div>
                         </Modal.Body>
