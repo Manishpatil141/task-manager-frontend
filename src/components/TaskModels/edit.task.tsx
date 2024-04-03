@@ -50,29 +50,52 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ showModal, onClose, onSub
         }));
     };
     
-
+   interface Task {
+        taskId: any;
+        title: string;
+        description: string;
+        priority: 'Low' | 'Medium' | 'High';
+        dueDate: string;
+        category: string;
+        user: number;
+    
+    }
     const handleSubmit = async (): Promise<void> => {
-        if(editedTask){
-        const validation =  validateTaskForm(editedTask.title,editedTask.description,editedTask.category,editedTask.dueDate,editedTask.priority)
+        if (!editedTask) return; // If editedTask is null, return early
+    
+        // Filter out unwanted properties
+        const filteredTask: Task = {
+            user: typeof editedTask.user === 'number' ? editedTask.user : 0, // Ensure user is a number
+            taskId: typeof editedTask.taskId === 'number' ? editedTask.taskId : 0, // Ensure taskId is a number
+            title: editedTask.title || '',
+            description: editedTask.description || '',
+            priority: editedTask.priority || 'Low', // Set default value if priority is null or empty
+            dueDate: editedTask.dueDate || '',
+            category: editedTask.category || ''
+        };
+    
+        const validation = validateTaskForm(filteredTask.title, filteredTask.description, filteredTask.category, filteredTask.dueDate, filteredTask.priority);
         if (validation) {
             setErrors(validation);
-            return; 
-        }}
-        try{
-            const response = await editTask(editedTask)
-            if(response.data.code ===200){
+            return;
+        }
+    
+        try {
+            const response = await editTask(filteredTask);
+            if (response.data.code === 200) {
                 setSuccessMessage(response.data.status);
                 setTimeout(() => {
                     setSuccessMessage('');
                     onClose();
                 }, 2000);
-            }else {
+            } else {
                 setErrorMessage(response.data.status);
             }
-        }catch(error){
+        } catch (error) {
             setErrorMessage('Failed to add task. Please try again.');
         }
     };
+    
 
     let formattedDueDate = '';
     if (editedTask && editedTask.dueDate) {

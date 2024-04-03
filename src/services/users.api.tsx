@@ -35,3 +35,12 @@ export const resetPassword = async(data:any)=>{
         throw new Error('Failed to reset password')
     }
 }
+
+export const userDetails = async(data:any)=>{
+    try{
+        const response = await axiosInstance.post('users/user-details',data)
+        return response
+    }catch(error){
+        throw new Error("Failed to get user details")
+    }
+}

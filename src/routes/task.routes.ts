@@ -1,6 +1,7 @@
-import CompletedTasks from "../components/TaskList/completed.task";
-import StarredTasks from "../components/TaskList/starredTask";
-import TaskManager from "../components/TaskList/taskManager";
+import CompletedTasks from "../components/Pages/completed.task";
+import StarredTasks from "../components/Pages/starredTask";
+import TaskManager from "../components/Pages/taskManager";
+
 
 
 
