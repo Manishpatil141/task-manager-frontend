@@ -1,4 +1,3 @@
-import axios from "axios";
 import { axiosInstance } from "./request";
 
 export const getTasks = async(userId:any)=>{
