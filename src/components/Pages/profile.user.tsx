@@ -5,7 +5,7 @@ import TopNavbar from '../NavBars/top.navbar';
 import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardImage, MDBCardText, MDBBtn, MDBInput } from 'mdb-react-ui-kit';
 import background from "../../assets/images/addTask.jpg";
 import ChangePasswordModal from '../TaskModels/changePassword.model';
-import { userDetails } from '../../services/users.api';
+import { changePassword, userDetails } from '../../services/users.api';
  // Import ChangePasswordModal component
 
 const Profile: React.FC = () => {
@@ -79,9 +79,31 @@ const Profile: React.FC = () => {
   };
 
   // Function to handle password change
-  const onChangePassword = (newPassword: string , currentPassword:string) => {
-   console.log(newPassword,currentPassword)
-    setShowPasswordModal(false); // Close the modal after changing the password
+   const onChangePassword =async (newPassword: string , currentPassword:string) => {
+    try {
+      const userIdString = localStorage.getItem("user");
+      if (userIdString !== null) {
+          const userId = parseInt(userIdString);  // Convert user ID to a number
+          if (!isNaN(userId)) {
+              const response = await changePassword({userId,currentPassword,newPassword})
+              //  console.log(response.data.code)
+              if(response.data.code ===200){
+                setTimeout(()=>{
+                  setShowPasswordModal(false);
+                },2000)
+
+              }
+             
+          } else {
+              console.error('User ID is not a valid number');
+          }
+      } else {
+          console.error('User ID not found in localStorage');
+      }
+  } catch (error) {
+      console.error('Failed to change the password:', error);
+  }
+ // Close the modal after changing the password
   };
 
   return (

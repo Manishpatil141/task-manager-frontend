@@ -46,12 +46,6 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ showModal, on
         setConfirmPassword('');
         setErrorMessage('');
         setSuccessMessage('Password changed successfully.');
-
-        // Close the modal after 2 seconds
-        setTimeout(() => {
-            setSuccessMessage('');
-            onClose();
-        }, 2000);
     };
 
     useEffect(() => {
@@ -60,10 +54,15 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ showModal, on
             timeout = setTimeout(() => {
                 setErrorMessage('');
             }, 2000);
+        } else if (successMessage) {
+            timeout = setTimeout(() => {
+                setSuccessMessage('');
+                onClose();
+            }, 2000);
         }
 
         return () => clearTimeout(timeout);
-    }, [errorMessage]);
+    }, [errorMessage, successMessage]);
 
     return (
         showModal ? (

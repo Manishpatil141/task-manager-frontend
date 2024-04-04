@@ -44,3 +44,13 @@ export const userDetails = async(data:any)=>{
         throw new Error("Failed to get user details")
     }
 }
+
+
+export const changePassword = async(data:any)=>{
+    try{
+        const response = await axiosInstance.post('users/change-password',data)
+        return response
+    }catch(error){
+        throw new Error("Failed to get user details")
+    }
+}
