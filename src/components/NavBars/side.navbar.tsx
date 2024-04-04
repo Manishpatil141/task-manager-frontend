@@ -11,7 +11,6 @@ const Sidebar: React.FC = () => {
             setSelectedOption(option);
         }
     };
-    
 
     return (
         <div className="d-flex flex-column flex-shrink-0 p-3 sidebar-container">
@@ -23,7 +22,7 @@ const Sidebar: React.FC = () => {
             <ul className="nav nav-pills flex-column mb-auto">
                 <li className="nav-item">
                     <Link to="/tasks" className={`nav-link ${selectedOption === "tasks" ? "active" : ""}`} onClick={() => handleOptionClick("tasks")}>
-                    <i className="bi bi-grid-3x3-gap"></i> Home
+                    <i className="bi bi-grid-3x3-gap"></i> Tasks
                     </Link>
                 </li>
                 <li>
@@ -36,13 +35,13 @@ const Sidebar: React.FC = () => {
                         <i className="bi bi-grid-3x3-gap"></i> Completed Tasks
                     </Link>
                 </li>
-                <li>
-                    <Link to="" className={`nav-link ${selectedOption === "category" ? "active" : ""}`} onClick={() => handleOptionClick("category")}>
-                        <i className="bi bi-grid-3x3-gap"></i> Category
+                <li className="nav-item">
+                    <Link to="/task-analysis" className={`nav-link ${selectedOption === "analyze" ? "active" : ""}`} onClick={() => handleOptionClick("analyze")}>
+                    <i className="bi bi-grid-3x3-gap"></i> Task analysis
                     </Link>
                 </li>
                 <li>
-                    <Link to="" className={`nav-link ${selectedOption === "profile" ? "active" : ""}`} onClick={() => handleOptionClick("profile")}>
+                    <Link to="/profile" className={`nav-link ${selectedOption === "profile" ? "active" : ""}`} onClick={() => handleOptionClick("profile")}>
                         <i className="bi bi-person"></i> Profile
                     </Link>
                 </li>

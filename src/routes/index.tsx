@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ForgotPassword, Login, Signup, ChangePassword,Logout } from './auth';
-import { CompletedTasks, StarredTasks, TaskManager } from './task.routes';
+import { CompletedTasks, StarredTasks, TaskManager,Analyzer } from './task.routes';
 import { Profile } from './profile.routes';
 
 
@@ -21,6 +21,7 @@ const AppRouter: React.FC = () => {
                 <Route path="/completed-tasks" element={<CompletedTasks />} />
                 <Route path="/logout" element={<Logout />} />
                 <Route path="/profile" element={<Profile/>} />
+                <Route path="/task-analysis" element={<Analyzer/>} />
 
                 {/* Add more routes for other pages if needed */}
                 {/* <Route path="/other-page" element={<OtherPageComponent />} /> */}

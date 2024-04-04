@@ -6,42 +6,45 @@ import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardImage, MDBCa
 import background from "../../assets/images/addTask.jpg";
 import ChangePasswordModal from '../TaskModels/changePassword.model';
 import { changePassword, userDetails } from '../../services/users.api';
- // Import ChangePasswordModal component
+
+
+// Import ChangePasswordModal component
 
 const Profile: React.FC = () => {
   // Hardcoded profile data
   const [profileData, setProfileData] = useState({
     email: 'example@email.com',
-    firstName:"",
-    lastName:"",
+    firstName: "",
+    lastName: "",
     userName: 'johndoe123',
-    profilePhoto: background, // Placeholder image URL
+    image: "", // Placeholder image URL
   });
 
 
-  
+
   useEffect(() => {
     const fetchUser = async () => {
-        try {
-            const userIdString = localStorage.getItem("user");
-            if (userIdString !== null) {
-                const userId = parseInt(userIdString);  // Convert user ID to a number
-                if (!isNaN(userId)) {
-                    const response = await userDetails({ userId });
-                    setProfileData(response.data.data);
-                } else {
-                    console.error('User ID is not a valid number');
-                }
-            } else {
-                console.error('User ID not found in localStorage');
-            }
-        } catch (error) {
-            console.error('Failed to fetch tasks:', error);
+      try {
+        const userIdString = localStorage.getItem("user");
+        if (userIdString !== null) {
+          const userId = parseInt(userIdString);  // Convert user ID to a number
+          if (!isNaN(userId)) {
+            const response = await userDetails({ userId });
+            console.log(response.data.data)
+            setProfileData(response.data.data);
+          } else {
+            console.error('User ID is not a valid number');
+          }
+        } else {
+          console.error('User ID not found in localStorage');
         }
+      } catch (error) {
+        console.error('Failed to fetch tasks:', error);
+      }
     };
 
     fetchUser();
-}, []);
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false); // State to control modal visibility
 
@@ -60,7 +63,7 @@ const Profile: React.FC = () => {
         if (e.target) {
           setProfileData({
             ...profileData,
-            profilePhoto: e.target.result as string,
+            image: e.target.result as string,
           });
         }
       };
@@ -79,32 +82,35 @@ const Profile: React.FC = () => {
   };
 
   // Function to handle password change
-   const onChangePassword =async (newPassword: string , currentPassword:string) => {
+  const onChangePassword = async (newPassword: string, currentPassword: string) => {
     try {
       const userIdString = localStorage.getItem("user");
       if (userIdString !== null) {
-          const userId = parseInt(userIdString);  // Convert user ID to a number
-          if (!isNaN(userId)) {
-              const response = await changePassword({userId,currentPassword,newPassword})
-              //  console.log(response.data.code)
-              if(response.data.code ===200){
-                setTimeout(()=>{
-                  setShowPasswordModal(false);
-                },2000)
+        const userId = parseInt(userIdString);  // Convert user ID to a number
+        if (!isNaN(userId)) {
+          const response = await changePassword({ userId, currentPassword, newPassword })
+          //  console.log(response.data.code)
+          if (response.data.code === 200) {
+            setTimeout(() => {
+              setShowPasswordModal(false);
+            }, 2000)
 
-              }
-             
-          } else {
-              console.error('User ID is not a valid number');
           }
+
+        } else {
+          console.error('User ID is not a valid number');
+        }
       } else {
-          console.error('User ID not found in localStorage');
+        console.error('User ID not found in localStorage');
       }
-  } catch (error) {
+    } catch (error) {
       console.error('Failed to change the password:', error);
-  }
- // Close the modal after changing the password
+    }
+    // Close the modal after changing the password
+
   };
+
+
 
   return (
     <div className="container-fluid" style={{ position: 'relative', height: '100vh', width: '100%' }}>
@@ -119,7 +125,7 @@ const Profile: React.FC = () => {
                   <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
                     <MDBCardBody className="text-center">
                       <MDBCardImage
-                        src={ background}
+                        src={profileData.image}
                         alt="avatar"
                         className="rounded-circle mx-auto mb-4"
                         style={{ width: '150px', height: '150px', cursor: 'pointer' }}
@@ -132,10 +138,10 @@ const Profile: React.FC = () => {
                         style={{ display: 'none' }}
                         onChange={handleProfilePhotoChange}
                       />
-                      <MDBCardText className="mb-1"><strong>Name:</strong> {profileData.firstName+'\t'+profileData.lastName}</MDBCardText>
+                      <MDBCardText className="mb-1"><strong>Name:</strong> {profileData.firstName + '\t' + profileData.lastName}</MDBCardText>
                       <MDBCardText className="mb-1"><strong>Username:</strong> {profileData.userName}</MDBCardText>
                       <MDBCardText className="mb-3"><strong>Email:</strong> {profileData.email}</MDBCardText>
-                      <MDBBtn onClick={handleChangePassword}>Change Password</MDBBtn>
+                      <MDBBtn onClick={handleChangePassword} style={{ height: "50px", width: "250px" }}>Change Password</MDBBtn>
                     </MDBCardBody>
                   </MDBCard>
                 </MDBCol>
