@@ -5,7 +5,6 @@ import reportWebVitals from './reportWebVitals';
 
 import AppRouter from './routes';
 
-
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
