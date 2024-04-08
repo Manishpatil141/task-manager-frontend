@@ -3,15 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Sidebar from '../NavBars/side.navbar';
 import TopNavbar from '../NavBars/top.navbar';
 import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBCardImage, MDBCardText, MDBBtn, MDBInput } from 'mdb-react-ui-kit';
-import background from "../../assets/images/addTask.jpg";
 import ChangePasswordModal from '../TaskModels/changePassword.model';
-import { changePassword, userDetails } from '../../services/users.api';
-
-
-// Import ChangePasswordModal component
+import { changePassword, userDetails, uploadProfilePhoto } from '../../services/users.api';
+import { API_URL } from '../../config/baseurl.config';
 
 const Profile: React.FC = () => {
-  // Hardcoded profile data
   const [profileData, setProfileData] = useState({
     email: 'example@email.com',
     firstName: "",
@@ -20,83 +16,102 @@ const Profile: React.FC = () => {
     image: "", // Placeholder image URL
   });
 
-
-
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userIdString = localStorage.getItem("user");
-        if (userIdString !== null) {
-          const userId = parseInt(userIdString);  // Convert user ID to a number
-          if (!isNaN(userId)) {
-            const response = await userDetails({ userId });
-            console.log(response.data.data)
-            setProfileData(response.data.data);
-          } else {
-            console.error('User ID is not a valid number');
-          }
-        } else {
-          console.error('User ID not found in localStorage');
-        }
-      } catch (error) {
-        console.error('Failed to fetch tasks:', error);
-      }
-    };
-
-    fetchUser();
+    fetchUserData();
   }, []);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showPasswordModal, setShowPasswordModal] = useState(false); // State to control modal visibility
 
-  // Function to handle profile photo click
+  const fetchUserData = async () => {
+    try {
+      const userIdString = localStorage.getItem("user");
+      if (userIdString !== null) {
+        const userId = parseInt(userIdString);
+        if (!isNaN(userId)) {
+          const response = await userDetails({ userId });
+          setProfileData(response.data.data);
+        } else {
+          console.error('User ID is not a valid number');
+        }
+      } else {
+        console.error('User ID not found in localStorage');
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+    }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
   const handleProfilePhotoClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  // Function to handle profile photo change
   const handleProfilePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target) {
-          setProfileData({
-            ...profileData,
-            image: e.target.result as string,
-          });
-        }
-      };
-      reader.readAsDataURL(event.target.files[0]);
+      const file = event.target.files[0];
+      const allowedFormats = ['.jpg', '.jpeg', '.png'];
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      if (fileExtension && allowedFormats.includes('.' + fileExtension)) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          if (e.target) {
+            setProfileData({
+              ...profileData,
+              image: e.target.result as string,
+            });
+
+            // Upload the file after a delay of 2 seconds
+            setTimeout(uploadFile, 500, file);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        console.error('Invalid file format. Please upload only .jpg, .jpeg, or .png files.');
+      }
     }
   };
 
-  // Function to handle password change
-  const handleChangePassword = () => {
-    setShowPasswordModal(true); // Show the password change modal
+  const uploadFile = async (file: File) => {
+    try {
+      const userIdString = localStorage.getItem("user");
+      if (userIdString !== null) {
+        const formData = new FormData();
+        formData.append('userId', userIdString);
+        formData.append('image', file);
+
+        const response = await uploadProfilePhoto(formData);
+        console.log('File uploaded:', response);
+
+        // Fetch user data again to get updated profile information
+        fetchUserData();
+      }
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+    }
   };
 
-  // Function to close the password change modal
+  const handleChangePassword = () => {
+    setShowPasswordModal(true);
+  };
+
   const handleClosePasswordModal = () => {
     setShowPasswordModal(false);
   };
 
-  // Function to handle password change
   const onChangePassword = async (newPassword: string, currentPassword: string) => {
     try {
       const userIdString = localStorage.getItem("user");
       if (userIdString !== null) {
-        const userId = parseInt(userIdString);  // Convert user ID to a number
+        const userId = parseInt(userIdString);
         if (!isNaN(userId)) {
           const response = await changePassword({ userId, currentPassword, newPassword })
-          //  console.log(response.data.code)
           if (response.data.code === 200) {
             setTimeout(() => {
               setShowPasswordModal(false);
             }, 2000)
-
           }
-
         } else {
           console.error('User ID is not a valid number');
         }
@@ -106,11 +121,7 @@ const Profile: React.FC = () => {
     } catch (error) {
       console.error('Failed to change the password:', error);
     }
-    // Close the modal after changing the password
-
   };
-
-
 
   return (
     <div className="container-fluid" style={{ position: 'relative', height: '100vh', width: '100%' }}>
@@ -125,7 +136,7 @@ const Profile: React.FC = () => {
                   <MDBCard style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
                     <MDBCardBody className="text-center">
                       <MDBCardImage
-                        src={profileData.image}
+                        src={profileData.image ? `${API_URL}/profile-photo/${profileData.image}` : ''}
                         alt="avatar"
                         className="rounded-circle mx-auto mb-4"
                         style={{ width: '150px', height: '150px', cursor: 'pointer' }}
@@ -137,6 +148,7 @@ const Profile: React.FC = () => {
                         ref={fileInputRef}
                         style={{ display: 'none' }}
                         onChange={handleProfilePhotoChange}
+                        accept=".jpg, .jpeg, .png" // Allow only specified formats
                       />
                       <MDBCardText className="mb-1"><strong>Name:</strong> {profileData.firstName + '\t' + profileData.lastName}</MDBCardText>
                       <MDBCardText className="mb-1"><strong>Username:</strong> {profileData.userName}</MDBCardText>
@@ -153,7 +165,6 @@ const Profile: React.FC = () => {
           </section>
         </div>
       </div>
-      {/* Render ChangePasswordModal if showPasswordModal is true */}
       <ChangePasswordModal showModal={showPasswordModal} onClose={handleClosePasswordModal} onChangePassword={onChangePassword} />
     </div>
   );
