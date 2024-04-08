@@ -54,3 +54,19 @@ export const changePassword = async(data:any)=>{
         throw new Error("Failed to get user details")
     }
 }
+
+
+
+
+export const uploadProfilePhoto = async (formData: FormData) => {
+    try {
+        const response = await axiosInstance.post(`users/upload-profile`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error("Failed to upload profile photo");
+    }
+};
